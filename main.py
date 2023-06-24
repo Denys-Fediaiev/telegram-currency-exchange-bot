@@ -1,12 +1,17 @@
 import telebot
 import os
 import requests
+import logging
 from requests.structures import CaseInsensitiveDict
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')
-API_KEY = "key"
+API_KEY = "#"
 
-bot = telebot.TeleBot("token")
+bot = telebot.TeleBot("#")
+
+
+logging.basicConfig(level=logging.INFO, filename="py_log.log", filemode="w",
+                    format="%(asctime)s %(levelname)s %(message)s")
 
 
 @bot.message_handler(commands=['start', 'hello'])
@@ -96,9 +101,15 @@ def currency_fetch(message, currency_in, currency_out):
     amount = float(message.text)
     exchange_c = currency_exchanger(currency_in, currency_out)
     print(exchange_c)
-    print(currency_in)
-    print(currency_out)
-    data = exchange_c['data']
+    logging.info(f"json format: {exchange_c}")
+    logging.info(f"currency code IN: {currency_in}")
+    logging.info(f"currency code OUT: {currency_out}")
+    logging.info(f"amount: {amount}")
+    try:
+        data = exchange_c['data']
+        logging.info(f"fetching successful with data result:{data}")
+    except:
+        logging.error(f"Error: {data}", exc_info=True)
     result = data[currency_out] * amount
     exchange_message = f'Current {currency_in} to {currency_out} rate is  {data[currency_out]}\n*your currency:* {currency_in} {amount}\n*you get:* {currency_out} {result}'
     bot.send_message(message.chat.id, "Here's your info!")
